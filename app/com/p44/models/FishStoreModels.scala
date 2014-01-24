@@ -38,9 +38,9 @@ object DeliveryReceipt {
 import com.typesafe.config.ConfigFactory
 
 object FishStoreModels {
-  
+
   val CONF = ConfigFactory.load
-  
+
   val FISHSTORE_TWO_DB_NAME = CONF.getString("store.two.mongodb.database").trim
   val FISHSTORE_TWO_DB_HOSTS: List[String] = List(CONF.getString("store.two.mongodb.hosts").trim)
 
@@ -81,14 +81,13 @@ object FishStoreModels {
     val fish = for (i <- 0 until count) yield { getRandomFish }
     fish.toList
   }
-  
-  
+
   import org.joda.time.DateTime
   import org.joda.time.DateTimeZone
   import org.joda.time.format._
-  
+
   val DATE_FORMATTER_USA: DateTimeFormatter = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss")
- 
+
   def makeMessageTimeJson(msg: String, ts: Long): Future[String] = {
     Future { makeMessageTimeJsonImpl(msg, ts) }
   }
@@ -96,7 +95,7 @@ object FishStoreModels {
     val mt = MessageTime(msg, formatTimstampMillis(ts, DATE_FORMATTER_USA))
     Json.prettyPrint(Json.toJson(mt))
   }
-  
+
   def formatTimstampMillis(ts: Long, formatter: DateTimeFormatter): String = { formatter.print(new DateTime(ts)) }
 
 }

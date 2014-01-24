@@ -12,18 +12,18 @@ import play.api.mvc.Controller
 object SimpleController extends Controller { // Defines utility methods to generate Action and Results types.
 
   lazy val homeMsg: String = "This is Fish Store"
-  lazy val helloMsg: String = "Hello There" 
+  lazy val helloMsg: String = "Hello There"
 
   def index = Action { // request => response
-	Ok(homeMsg) // 200
+    Ok(homeMsg) // 200
   }
-  
+
   def hello(name: String) = Action.async { // request => future response
-	Future {
-	  Ok(helloMsg + ", " + name + ". " + homeMsg)
-	}
+    Future {
+      Ok(helloMsg + ", " + name + ". " + homeMsg)
+    }
   }
-  
+
   // Play allows the return of a Future Result
 
 }

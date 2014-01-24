@@ -34,11 +34,11 @@ object FishStoreOne {
 
 }
 
-/** 
- *  Controller 
- *  
+/**
+ *  Controller
+ *
  *  controller ! FishStoreOne.Deliver(shipment) --> Unloader --> Catcher + Stacker
- *  
+ *
  *  "like people" (that appear and disappear)
  */
 class FishStoreController extends Actor with ActorLogging {

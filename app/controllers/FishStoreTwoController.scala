@@ -22,7 +22,7 @@ import play.api.Logger
  * Restful services for Fish Store Two
  */
 object FishStoreTwoController extends Controller {
-  
+
   import com.p44.actors.store.two.FishStoreTwo
   import com.p44.models.{ DeliveryReceipt, Fish, FishStoreModels }
 
@@ -30,10 +30,10 @@ object FishStoreTwoController extends Controller {
   val controllerActor = Akka.system.actorOf(FishStoreTwo.propsController, name = "fishStoreTwoController")
   lazy val defaultCatchSize = 100
   implicit val timeout = Timeout(6.seconds) // used for ask ?
-  
+
   /** route to home page */
   def viewStoreTwo = Action.async { request =>
-	Future { Ok(views.html.fishstoretwo.render) }
+    Future { Ok(views.html.fishstoretwo.render) }
   }
 
   /**
@@ -44,7 +44,7 @@ object FishStoreTwoController extends Controller {
     val f: Future[String] = FishStoreModels.aBunchOfFishToJson(FishStoreModels.generateFish(defaultCatchSize))
     f.map(s => Ok(s)) // Note: f.onComplete does not work here because it returns Unit
   }
-  
+
   /**
    * POST /store_one/delivery
    * Takes a shipment of fish into the store.
@@ -67,7 +67,6 @@ object FishStoreTwoController extends Controller {
     }
   }
 
-  
   /** Takes a delivery, currently a json array of fish and creates an object to pass to the actors */
   def resolveDeliveryJsonToObj(request: Request[AnyContent]): Option[List[Fish]] = {
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -80,25 +79,25 @@ object FishStoreTwoController extends Controller {
   }
 
   // Added...
-  
+
   /** Enumeratee for detecting disconnect of the stream */
   def connDeathWatch(addr: String): Enumeratee[JsValue, JsValue] = {
     Enumeratee.onIterateeDone { () =>
       Logger.info(addr + " - fishStoreTwoOut disconnected")
     }
   }
-  
+
   /** Controller action serving activity for fish store two (no filter) */
   def fishStoreTwoDeliveryFeed = Action { request =>
     Logger.info("FEED fishStoreTwo - " + request.remoteAddress + " - fishStoreTwo connected")
     // Enumerator: a producer of typed chunks of data (non-blocking producer)
     val enumerator: Enumerator[JsValue] = FishStoreBroadcaster.fishStoreTwoOut
     Ok.chunked(enumerator
-      through Concurrent.buffer(100)  // buffers chunks and frees the enumerator to keep processing
+      through Concurrent.buffer(100) // buffers chunks and frees the enumerator to keep processing
       through connDeathWatch(request.remoteAddress)
       through EventSource()).as("text/event-stream")
   }
-  
+
   /*
    * Chunked transfer encoding is a data transfer mechanism in version 1.1 of the Hypertext Transfer Protocol (HTTP) 
    * in which a web server serves content in a series of chunks. 

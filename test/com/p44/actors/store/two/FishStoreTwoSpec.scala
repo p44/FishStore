@@ -18,31 +18,31 @@ object FishStoreTwoSpec extends Specification {
   sequential
 
   val duration = new FiniteDuration(5, SECONDS)
-  implicit val timeout = Timeout (duration)
-  
+  implicit val timeout = Timeout(duration)
+
   val delivery = List(Fish("trout", 2.5), Fish("trout", 2.6), Fish("mackerel", 3.5))
 
   "FishStoreTwo" should {
     "Deliver" in {
-        implicit val system = ActorSystem("TestSys")
-        val controller = system.actorOf(FishStoreTwo.propsController)
-        val p = TestProbe()
-        p.send(controller, FishStoreTwo.Echo)
-        val e1: String = p.expectMsg("Echo")
-        e1 mustEqual "Echo"
-        
-        val w = p.watch(controller)
-        println("Deliver w " + w) 
-        
-        val f = (controller ask FishStoreTwo.Deliver(delivery)).mapTo[DeliveryReceipt]
-        val rDr: DeliveryReceipt = Await.result(f, duration)
-        println("Deliver rDr " + rDr) // DeliveryReceipt(1390593161821,3,8.6,25.799999999999997,01/24/2014 12:52:41,Thank You!)
-        system.shutdown
-        system.awaitTermination
-        rDr.fishCount mustEqual 3
-        rDr.totalWeight mustEqual 8.6
-        rDr.message mustEqual "Thank You!"
-        rDr.payment > 25 mustEqual true
+      implicit val system = ActorSystem("TestSys")
+      val controller = system.actorOf(FishStoreTwo.propsController)
+      val p = TestProbe()
+      p.send(controller, FishStoreTwo.Echo)
+      val e1: String = p.expectMsg("Echo")
+      e1 mustEqual "Echo"
+
+      val w = p.watch(controller)
+      println("Deliver w " + w)
+
+      val f = (controller ask FishStoreTwo.Deliver(delivery)).mapTo[DeliveryReceipt]
+      val rDr: DeliveryReceipt = Await.result(f, duration)
+      println("Deliver rDr " + rDr) // DeliveryReceipt(1390593161821,3,8.6,25.799999999999997,01/24/2014 12:52:41,Thank You!)
+      system.shutdown
+      system.awaitTermination
+      rDr.fishCount mustEqual 3
+      rDr.totalWeight mustEqual 8.6
+      rDr.message mustEqual "Thank You!"
+      rDr.payment > 25 mustEqual true
     }
   }
 

@@ -65,22 +65,22 @@ class FishStoreController extends Actor with ActorLogging {
       val now = System.currentTimeMillis
       log.info("New delivery of this many fish: " + shipment.size)
       shipment.foreach { x => unloaderRef ! FishStoreThree.Unload(now, x) }
-      
+
       // In Store two we used pipe to, but the sender uses future.map which
       // val futureRecepit = (calculatorRef ? FishStoreTwo.GenerateReceipt(now, shipment))
       // futureRecepit pipeTo sender 
-      
+
       val mysender: ActorRef = sender // final def sender(): ActorRef
       val futureRecepit = (calculatorRef.ask(FishStoreThree.GenerateReceipt(now, shipment)))
       // Another option resolve errors here by logging and use Option  
       futureRecepit.onComplete {
         case Success(r) => mysender ! Some(r)
         case Failure(e) => {
-          log.error("calculatorRef ? FishStoreThree.GenerateReceipt ERROR: " +  e.getMessage)
+          log.error("calculatorRef ? FishStoreThree.GenerateReceipt ERROR: " + e.getMessage)
           mysender ! None
         }
       } // NOTE: for good fun switch mysender with sender above
-      
+
     }
     case FishStoreThree.Done => print("u")
     case FishStoreThree.Echo => sender ! "Echo"
@@ -88,7 +88,6 @@ class FishStoreController extends Actor with ActorLogging {
   }
 
 }
-
 
 class FishDeliveryCalculator extends Actor with ActorLogging {
   def receive = {

@@ -22,7 +22,7 @@ import play.api.Logger
  * Restful services for Fish Store Two
  */
 object FishStoreThreeController extends Controller {
-  
+
   import com.p44.actors.store.three.FishStoreThree
   import com.p44.models.{ DeliveryReceipt, Fish, FishStoreModels }
 
@@ -37,9 +37,9 @@ object FishStoreThreeController extends Controller {
    */
   def getCatchLatest(size: Int) = Action.async {
     val f: Future[String] = FishStoreModels.aBunchOfFishToJson(FishStoreModels.generateFish(size))
-    f.map(s => Ok(s)) 
+    f.map(s => Ok(s))
   }
-  
+
   /**
    * POST /store_one/delivery
    * Takes a shipment of fish into the store.
@@ -65,7 +65,6 @@ object FishStoreThreeController extends Controller {
     }
   }
 
-  
   /** Takes a delivery, currently a json array of fish and creates an object to pass to the actors */
   def resolveDeliveryJsonToObj(request: Request[AnyContent]): Option[List[Fish]] = {
     val jsonBody: Option[JsValue] = request.body.asJson
@@ -78,14 +77,14 @@ object FishStoreThreeController extends Controller {
   }
 
   // Feed
-  
+
   /** Enumeratee for detecting disconnect of the stream */
   def connDeathWatch(addr: String): Enumeratee[JsValue, JsValue] = {
     Enumeratee.onIterateeDone { () =>
       Logger.info(addr + " - FishStoreThreeOut disconnected")
     }
   }
-  
+
   /** Controller action serving activity for fish store two (no filter) */
   def fishStoreThreeDeliveryFeed = Action { req =>
     Logger.info("FEED FishStoreThree - " + req.remoteAddress + " - FishStoreThree connected")
@@ -93,7 +92,7 @@ object FishStoreThreeController extends Controller {
       &> Concurrent.buffer(100)
       &> connDeathWatch(req.remoteAddress)
       &> EventSource()).as("text/event-stream")
-      // &>  Compose this Enumerator with an Enumeratee. Alias for through
+    // &>  Compose this Enumerator with an Enumeratee. Alias for through
   }
 
 }
