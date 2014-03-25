@@ -19,14 +19,14 @@ object FishStoreOneSpec extends Specification {
     "Deliver" in {
       running(FakeApplication()) {
         implicit val system = ActorSystem("TestSys")
-        val controller = system.actorOf(FishStoreOne.propsController)
+        val a = system.actorOf(FishStoreOne.propsController)
         val p = TestProbe()
-        p.send(controller, FishStoreOne.Echo)
+        p.send(a, FishStoreOne.Echo)
         val e1: String = p.expectMsg("Echo")
         e1 mustEqual "Echo"
         
-        p.send(controller, FishStoreOne.Deliver(delivery))
-        Thread.sleep(1000L)
+        p.send(a, FishStoreOne.Deliver(delivery))
+        a.isTerminated mustEqual false
         system.shutdown
         system.awaitTermination
         true
