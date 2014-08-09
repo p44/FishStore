@@ -79,10 +79,9 @@ trait Persistable[T] {
   def findMultipleByQueryWithSortAsFuture(collection: BSONCollection, query: BSONDocument, sort: BSONDocument, opts: Option[QueryOpts]): Future[List[T]] = {
     opts.isDefined match {
       case true => {
-        val gqb = collection.find(query).sort(sort).options(opts.get)
+        val gqb = collection.find(query).sort(sort).options(opts.get) // GenericQueryBuilder
         val c = gqb.cursor[T]
-        val r = c.collect[List]()
-        r
+        c.collect[List]()
       }
       case _ => collection.find(query).sort(sort).cursor[T].collect[List]()
     }
