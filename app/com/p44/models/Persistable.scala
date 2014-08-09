@@ -38,7 +38,7 @@ trait Persistable[T] {
   def getMongoId(doc: BSONDocument, fieldName_id: String): String = {
     val oid: Option[BSONObjectID] = doc.getAs[BSONObjectID](fieldName_id)
     oid match {
-      case None => "ERROR"
+      case None => throw new Exception("Failed mongoId conversion for field name " + fieldName_id)
       case Some(id) => id.stringify // hexadecimal String representation
     }
   }
