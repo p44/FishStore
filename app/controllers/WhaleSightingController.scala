@@ -72,7 +72,7 @@ object WhaleSightingController extends Controller {
     val fLastError = WhaleSighting.getCollection(db).remove(WhaleSighting.findById(id), WhaleSighting.lastErrorDefault, true)
     fLastError.map { le =>
       le.ok match {
-        case false => BadRequest("None found for id " + id)
+        case false => BadRequest("None found or failed to remove for id " + id)
         case _ => Ok("Removed " + id)
       }
     }
