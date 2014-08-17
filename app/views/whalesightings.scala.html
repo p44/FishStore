@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Whale Sightings</title>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/main.min.css")'>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body ng-app="whaleSightings">
+<div ng-controller="whaleSightingsCtrl">
+    <div class="container">
+        <div class="header">
+            <ul class="nav nav-pills pull-right">
+                <li><a href="@routes.FishStoreOneController.viewStoreOne">One</a></li>
+                <li><a href="@routes.FishStoreTwoController.viewStoreTwo">Two</a></li>
+                <li class="active"><a href="@routes.WhaleSightingController.viewWhaleSightings">Whales!</a></li>
+            </ul>
+            <h3 class="text-muted">Whale Sightings</h3>
+        </div>
+
+        <div class="jumbotron">
+            <p class="lead">Share your whale sightings.  It's fun.</p>
+            <p>
+                <!-- trigger modal new sighting form -->
+                <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newSightingModal">I See One!</button>
+            </p>
+        </div>
+
+        <div class="row marketing">
+            <div class="col-md-6">
+                <h4>A Sighting With Comments <span ng-show="singleSightingSelected()" class="glyphicon glyphicon-check text-success"></span></h4>
+
+                <div ng-show="singleSightingSelected()">
+                    <ul>
+                        <li><span class="text-primary">Id: </span> {{single_sighting._id}}</li>
+                        <li><span class="text-primary">Breed: </span> {{single_sighting.breed}}</li>
+                        <li><span class="text-primary">Count: </span> {{single_sighting.count}}</li>
+                        <li><span class="text-primary">Timestamp: </span> {{single_sighting_display_date}} </li>
+                        <li><span class="text-primary">Description: </span> {{single_sighting.description}}</li>
+                    </ul>
+                    <p> Comments: </p>
+                    <p>{{single_sighting_display_comments}}</p>
+                    <!--ul>
+                        <div class="comments" ng-repeat="comment in single_sighting.comments">
+                            <li>{{comment.comment}}</li>
+                        </div>
+                    </ul-->
+                </div>
+                <div ng-show="singleSightingNotSelected()">
+                    <p>Select any sighting from the watch list.</p>
+                </div>
+
+                <br/>
+
+                <h4>Add a Comment <span ng-show="singleSightingSelected()" class="glyphicon glyphicon-check text-primary"></span></h4>
+                <div ng-show="singleSightingSelected()">
+                    <form ng-submit="submitNewComment()">
+                        <div class="form-group">
+                            <label for="new_comment">Comment</label>
+                            <input type="text" ng-model="form_comment.comment" id="new_comment" name="new_comment" ng-required="true" ng-minlength="3" ng-maxlength="45" />
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Go</button>
+                        </div>
+                     </form>
+                 </div>
+
+                <br/>
+
+            </div>
+            <div class="col-md-6">
+                <h4>Watch The Fun <span class="glyphicon glyphicon-eye-open text-primary"></span></h4>
+                <p>Sightings appear below...</p>
+                <ul>
+                    <!-- breed: String, count: Int, description: String, timestamp: Long, comments -->
+                    <div class="sighting" ng-repeat="sighting in sightings_feed_msgs | limitTo:-10">
+                        <li><span class="text-primary"><a ng-click="selectSighting(sighting._id)">{{sighting.breed}} ({{sighting.count}})</a></span> <span class="text-warning">{{sighting.description}}</span></li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row marketing">
+            <div class="col-sm-12 col-md-6 col-md-offset-6">
+
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><a href="https://github.com/p44/FishStore" target"_blank">GitHub p44 FishStore</a></p>
+        </div>
+
+    </div> <!-- /container -->
+
+    <!-- Modal New Sighting -->
+    <div class="modal fade" id="newSightingModal" tabindex="-1" role="dialog" aria-labelledby="newSightingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">A New Whale Sighting</h4>
+                </div>
+                <form ng-submit="submitNewSighting()" ng-controller="whaleSightingsCtrl">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="new_sighting_breed">Breed</label>
+                            <input type="text" ng-model="form_new_sighting.breed" id="new_sighting_breed" name="new_sighting_breed" ng-required="true" ng-minlength="3" ng-maxlength="45" />
+                        </div>
+                        <div class="form-group">
+                            <label for="new_sighting_breed">Count</label>
+                            <input type="number" ng-model="form_new_sighting.count" id="new_sighting_count" name="new_sighting_count" ng-required="true" />
+                        </div>
+                        <div class="form-group">
+                            <label for="new_sighting_breed">Description</label>
+                            <input type="text" ng-model="form_new_sighting.description" id="new_sighting_description" name="new_sighting_description" ng-required="true" ng-minlength="3" ng-maxlength="140"/>
+                        </div>
+                        <br/>
+                        <pre>Preview: {{form_new_sighting.breed}}, {{form_new_sighting.count}}, {{form_new_sighting.description}}</pre>
+                        <br/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Share It!</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- ng-controller -->
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular-route.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<script type='text/javascript' src='@routes.Assets.at("javascripts/app.min.js")'></script>
+<script type='text/javascript' src='@routes.Assets.at("javascripts/services.js")'></script>
+<script type='text/javascript' src='@routes.Assets.at("javascripts/controllers.js")'></script>
+</body>
+</html>
