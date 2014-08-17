@@ -9,7 +9,7 @@ import reactivemongo.bson.BSONDocument
 import scala.concurrent.{Future, Await}
 
 /**
- *
+ * Note there are 2 ways to insert in the test just for fun, only one is needed and the Persistable[T] way is simpler
  */
 object WhaleSightingSpec extends Specification {
 
@@ -135,7 +135,14 @@ object WhaleSightingSpec extends Specification {
       oFound2 mustNotEqual None
       oFound2.get.description mustEqual ss
 
-      // TODO add a comment
+      // add a comment
+      val modifier3: BSONDocument = WhaleSighting.modifierAddComment("Lucky you!")
+      Await.result(WhaleSighting.updateOneAsFuture(db, qById, modifier3), timeout).ok mustEqual true
+      val oFound3: Option[WhaleSighting] = Await.result(collection.find(qById).one[WhaleSighting], timeout)
+      println("find one by query 3 " + oFound3)
+      oFound2 mustNotEqual None
+      println("added comments " + oFound2.get.comments.mkString(" "))
+      oFound3.get.comments.size mustEqual 2
 
     }
 
