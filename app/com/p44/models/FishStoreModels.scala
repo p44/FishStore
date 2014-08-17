@@ -1,9 +1,6 @@
 package com.p44.models
 
 import play.api.libs.json._
-import play.api.libs.functional._
-import play.api.libs.functional.syntax._
-import play.api.data.validation.ValidationError
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -35,6 +32,14 @@ object DeliveryReceipt {
   def toJsArray(objs: List[DeliveryReceipt]): JsArray = JsArray(objs.map(Json.toJson(_)).toSeq)
 }
 
+/** A whale sighting comment or other general comment */
+case class Comment(comment: String)
+object Comment {
+  implicit val jsonWriter = Json.writes[Comment] // Json.toJson(obj): JsValue
+  implicit val jsonReader = Json.reads[Comment] // Json.fromJson[T](jsval): JsResult[T] .asOpt Option[T]
+  def toJsArray(objs: List[Comment]): JsArray = JsArray(objs.map(Json.toJson(_)).toSeq)
+}
+
 import com.typesafe.config.ConfigFactory
 
 object FishStoreModels {
@@ -43,6 +48,8 @@ object FishStoreModels {
 
   val FISHSTORE_TWO_DB_NAME = CONF.getString("store.two.mongodb.database").trim
   val FISHSTORE_TWO_DB_HOSTS: List[String] = List(CONF.getString("store.two.mongodb.hosts").trim)
+
+  val JSON_ARRAY_EMPTY = "[]"
 
   /** (name, min lbs, max lbs) */
   val possibleFish: Seq[(String, Int, Int)] = Seq(("sea bass", 5, 10),
@@ -83,7 +90,6 @@ object FishStoreModels {
   }
 
   import org.joda.time.DateTime
-  import org.joda.time.DateTimeZone
   import org.joda.time.format._
 
   val DATE_FORMATTER_USA: DateTimeFormatter = DateTimeFormat.forPattern("MM/dd/yyyy HH:mm:ss")
