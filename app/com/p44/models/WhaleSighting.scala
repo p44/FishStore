@@ -23,6 +23,7 @@ object WhaleSighting extends Persistable[WhaleSighting]{
   val fieldComments = "comments"
 
   lazy val empty = WhaleSighting("0", "", 0, "", 0L, Nil)
+  val ID_NONE = "0"
 
   implicit object persistanceWriter extends BSONDocumentWriter[WhaleSighting] {
     def write(obj: WhaleSighting): BSONDocument = toBson(obj: WhaleSighting)
@@ -72,6 +73,9 @@ object WhaleSighting extends Persistable[WhaleSighting]{
   def findMongoIdExists: BSONDocument = { BSONDocument(fieldMongoId -> BSONDocument("$exists" -> true)) }
   def findById(midAsHexString: String): BSONDocument = { BSONDocument(fieldMongoId -> hexStringToMongoId(midAsHexString)) }
   def findByTimestamp(ts: Long): BSONDocument = { BSONDocument(fieldTimestamp -> ts) }
+  def findByBody(ws: WhaleSighting): BSONDocument = {
+    BSONDocument(fieldTimestamp -> ws.timestamp, fieldCount -> ws.count, fieldBreed -> ws.breed, fieldDescription -> ws.description)
+  }
 
   // sorts
   def sortTimestampDesc: BSONDocument = BSONDocument(fieldTimestamp -> -1)
@@ -79,6 +83,7 @@ object WhaleSighting extends Persistable[WhaleSighting]{
 
   // modifiers
   def modifierSetDescription(s: String): BSONDocument = { BSONDocument("$set" -> BSONDocument(fieldDescription -> s)) }
+  def modifierAddComment(s: String): BSONDocument = { BSONDocument("$addToSet" -> BSONDocument(fieldComments -> s)) }
 
   // JSON
   implicit val jsonWriter = Json.writes[WhaleSighting] // Json.toJson(obj): JsValue
