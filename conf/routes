@@ -11,6 +11,14 @@ GET     /fish_store_two/catch/latest		controllers.FishStoreTwoController.getCatc
 POST    /fish_store_two/delivery			controllers.FishStoreTwoController.postDelivery
 GET     /feed/fish_store_two/delivery		controllers.FishStoreTwoController.fishStoreTwoDeliveryFeed
 
+GET     /whalesightings                     controllers.WhaleSightingController.viewWhaleSightings
+GET     /whalesightings/limit/:limit        controllers.WhaleSightingController.getWhaleSightingMany(limit: Int)
+GET     /whalesightings/:id                 controllers.WhaleSightingController.getWhaleSighting(id: String)
+POST    /whalesightings                     controllers.WhaleSightingController.postWhaleSighting
+POST    /whalesightings/blocking            controllers.WhaleSightingController.postWhaleSightingBlockingAction
+PUT     /whalesightings/:id/comment         controllers.WhaleSightingController.putWhaleSightingAddComment(id: String)
+GET     /feed/whalesightings/sightings      controllers.WhaleSightingController.whaleSightingsFeed
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 # GET     /webjars/*file              controllers.WebJarAssets.at(file)
