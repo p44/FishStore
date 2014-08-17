@@ -90,3 +90,29 @@ object WhaleSighting extends Persistable[WhaleSighting]{
   implicit val jsonReader = Json.reads[WhaleSighting] // Json.fromJson[T](jsval): JsResult[T] .asOpt Option[T]
   def toJsArray(objs: List[WhaleSighting]): JsArray = JsArray(objs.map(Json.toJson(_)).toSeq)
 }
+
+
+/**
+ * A generator for load testing.
+ */
+object WhaleSightingGenerator {
+  val breeds = List("Right Whale", "Bowhead Whale", "Gray Whale", "Fin Whale", "Sei Whale", "Blue Whale", "Narwhal", "Beluga")
+  def getRandomCount: Int = scala.util.Random.nextInt(5)
+  def getRandomBreed: String = breeds(scala.util.Random.nextInt(breeds.size))
+
+  /**
+   * Generate this many Whale Sightings
+   *
+   * @param size
+   * @return
+   */
+  def generate(size: Int): List[WhaleSighting] = {
+    if (size < 1) List()
+    else {
+      val r = for (i <- 0 until size) yield {
+        WhaleSighting(WhaleSighting.ID_NONE, getRandomBreed, getRandomCount, "This is auto-generated.", System.currentTimeMillis, List())
+      }
+      r.toList
+    }
+  }
+}
