@@ -216,5 +216,121 @@ controller('FishStoreThreeCtrl',function ($scope, $http, $location, $timeout) {
     $scope.listen();
 });
 
-//controller('FishStoreThreeWatch',function ($scope, $http, $location, $timeout) {	
-//});
+
+// WhaleSighting - breed: String, count: Int, description: String, timestamp: Long, comments: List[String]
+/** Controllers 4 */
+angular.module('whaleSightings.controllers', ['whaleSightings.services']).
+    controller('whaleSightingsCtrl', function ($scope, $http, $location, $timeout) {
+
+        $scope.open_sighting_empty = JSON.parse('[]'); // single sighting selection
+        $scope.sightings_feed_msgs = []; // array of whale sightings
+        $scope.sighting_none = JSON.parse('{"_id": "", "breed": "", "count": 0, "description": "", "timestamp": 0, "comments": []}');
+        $scope.single_sighting = $scope.sighting_none;
+        $scope.single_sighting_display_date = $scope.single_sighting.timestamp;
+        $scope.single_sighting_display_comments = "";
+
+        $scope.form_new_sighting = {};
+        $scope.form_new_sighting.breed = "";
+        $scope.form_new_sighting.count = 1;
+        $scope.form_new_sighting.description = "";
+
+        $scope.form_comment = {};
+        $scope.form_comment.comment = "";
+
+        $scope.singleSightingSelectedStubbTrue = function () { return true; }
+        $scope.singleSightingSelected = function () {
+            return ($scope.single_sighting.breed != "" && $scope.single_sighting.timestamp > 0);
+        }
+        $scope.singleSightingNotSelected = function () {
+            return ($scope.single_sighting.breed == "" && $scope.single_sighting.timestamp == 0);
+        }
+
+        /**
+         * GET sighting
+         * We go back to the server to make sure we have a current comments list
+         */
+        $scope.selectSighting = function (_id) {
+            console.log('selectSighting ' + _id);
+            var url = '/whalesightings/' + _id;
+            $http({method: 'GET', url: url
+            }).success(function(data, status, headers, config) {
+                console.log("GET success.");
+                console.log(data);
+                $scope.single_sighting = data;
+                $scope.single_sighting_display_date = new Date($scope.single_sighting.timestamp);
+                $scope.single_sighting.comments.shift();
+                $scope.single_sighting_display_comments = $scope.single_sighting.comments.join(", ");
+            }).error(function(data, status, headers, config) {
+                console.log('GET ' + url + ' ERROR ' + status)
+                // TODO error message
+            });
+        }
+
+        /** POST new sighting */
+        $scope.submitNewSighting = function() {
+            var jBody = JSON.stringify($scope.form_new_sighting);
+            var url = '/whalesightings';
+            console.log('POST ' + jBody);
+            $http({method: 'POST', url: url,
+                headers: {'Content-Type': 'application/json'},
+                data: jBody
+            }).success(function (data, status, headers, config) {
+                console.log("POST success.");
+                console.log(data);
+            }).error(function (data, status, headers, config) {
+                console.log('POST ' + url + ' ERROR ' + status);
+                // TODO failure message
+            });
+        }
+
+        $scope.submitNewComment = function() {
+            var jBody = JSON.stringify($scope.form_comment);
+            var id = $scope.single_sighting._id;
+            var url = '/whalesightings/' + id + '/comment';
+            console.log('PUT ' + url + ' ' + jBody);
+            $http({method: 'PUT', url: url,
+                headers: {'Content-Type': 'application/json'},
+                data: jBody
+            }).success(function (data, status, headers, config) {
+                console.log("PUT success.");
+                $scope.selectSighting(id);
+            }).error(function (data, status, headers, config) {
+                console.log('POST ' + url + ' ERROR ' + status);
+                // TODO failure message
+            });
+
+        }
+
+        /** handle incoming delivery feed messages: add to messages array */
+        $scope.addSightingFeedMsg = function (msg) {
+            var msgobj = JSON.parse(msg.data);
+            console.log('Got SightingsFeedMsg' + msg.data);
+            $scope.$apply(function () {
+                $scope.sightings_feed_msgs.pop(); // take off last
+                $scope.sightings_feed_msgs.unshift(msgobj); // add to first index of the array
+
+            });
+        };
+
+        $scope.loadRecent = function()  {
+            var url = '/whalesightings/limit/10'
+            $http({method: 'GET', url: url
+            }).success(function(data, status, headers, config) {
+                console.log("loadRecent GET success.");
+                $scope.sightings_feed_msgs = data;
+            }).error(function(data, status, headers, config) {
+                console.log('GET ' + url + ' ERROR ' + status)
+                // TODO error message
+            });
+        }
+
+        /** start listening to the deliery feed for the fish store */
+        $scope.listen = function () {
+            $scope.delivery_feed = new EventSource("/feed/whalesightings/sightings");
+            $scope.delivery_feed.addEventListener("message", $scope.addSightingFeedMsg, false);
+        };
+
+        $scope.loadRecent(); // on page load fetch the latest 10 sightings
+        $scope.listen(); // establish event source for sightings feed
+
+    });

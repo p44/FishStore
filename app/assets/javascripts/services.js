@@ -15,3 +15,8 @@ angular.module('fishstoreThree.services', []).
 service('blankModel', function () {
    console.log('fishstoreThree.services.blankModel')
 });
+
+angular.module('whaleSightings.services', []).
+service('blankModel', function () {
+   console.log('whaleSightings.services.blankModel')
+});
