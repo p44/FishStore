@@ -15,7 +15,7 @@ trait Persistable[T] {
   val collectionName: String // name of the mongodb collection
   val failoverStrategy: Option[FailoverStrategy] = None // optional
   val lastErrorDefault: GetLastError = GetLastError() // GetLastError(false, None, false)
-  val queryOptsDefault: QueryOpts = QueryOpts() //
+  val queryOptsDefault: QueryOpts = QueryOpts() // QueryOpts(skipN: Int = 0, batchSizeN: Int = 0, flagsN: Int = 0)
 
   val persistanceWriter: BSONDocumentWriter[T]
   val persistanceReader: BSONDocumentReader[T]
@@ -51,7 +51,8 @@ trait Persistable[T] {
     insertOneAsFuture(getCollection(db), obj)
   }
 
-  /** calls collection.insert(getBsonForInsert(obj)) */
+  /** calls collection.insert(getBsonForInsert(obj))
+    * getBsonForInsert will ignore the present id value letting mongodb gen the _id */
   def insertOneAsFuture(collection: BSONCollection, obj: T): Future[LastError] = {
     collection.insert(getBsonForInsert(obj))
   }
