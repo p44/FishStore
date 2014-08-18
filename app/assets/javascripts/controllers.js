@@ -233,6 +233,17 @@ angular.module('whaleSightings.controllers', ['whaleSightings.services']).
         $scope.form_new_sighting.breed = "";
         $scope.form_new_sighting.count = 1;
         $scope.form_new_sighting.description = "";
+        $scope.form_new_sighting_breed_options = [
+             { id : "Right Whale", name: "Right Whale" }
+            ,{ id : "Bowhead Whale", name: "Bowhead Whale" }
+            ,{ id : "Gray Whale"  , name: "Gray Whale" }
+            ,{ id : "Fin Whale"  , name: "Fin Whale" }
+            ,{ id : "Sei Whale"  , name: "Sei Whale" }
+            ,{ id : "Blue Whale"  , name: "Blue Whale" }
+            ,{ id : "Narwhal"  , name: "Narwhal" }
+            ,{ id : "Beluga"  , name: "Beluga" }
+            ,{ id : "Unknown"  , name: "Unknown" }
+        ];
 
         $scope.form_comment = {};
         $scope.form_comment.comment = "";

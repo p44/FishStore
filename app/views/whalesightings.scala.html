@@ -118,7 +118,10 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="new_sighting_breed">Breed</label>
-                            <input type="text" ng-model="form_new_sighting.breed" id="new_sighting_breed" name="new_sighting_breed" ng-required="true" ng-minlength="3" ng-maxlength="45" />
+                            <!-- input type="text" ng-model="form_new_sighting.breed" id="new_sighting_breed" name="new_sighting_breed" ng-required="true" ng-minlength="3" ng-maxlength="45" / -->
+                            <select ng-model="form_new_sighting.breed" ng-required="true"
+                                    ng-options="obj.id as obj.name for obj in form_new_sighting_breed_options">
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="new_sighting_breed">Count</label>
