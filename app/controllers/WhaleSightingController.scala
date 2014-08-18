@@ -83,16 +83,19 @@ object WhaleSightingController extends Controller {
    * @return
    */
   def loadTest(size: Int) = Action.async { request =>
-    val generated: List[WhaleSighting] = WhaleSightingGenerator.generate(1000)
+    // Synchronous - generate synchronously to test the db concurrency only
+    val generated: List[WhaleSighting] = WhaleSightingGenerator.generate(size)
     println("Load Test, generated " + generated.size)
     println("Load Test, inserting... ")
     val start = System.currentTimeMillis
+    // Synchronous end
     val f = Future {
       val collLoadTest = WhaleSighting.getCollection(MongoDbStoreTwo.WHALE_SIGHTING_LOAD_DB)
       generated.foreach(x => WhaleSighting.insertOneAsFuture(collLoadTest, x))
     }
     f.map { x =>
-      println("Load Test, inserting done.")
+      val elapsed = System.currentTimeMillis - start
+      println("Load Test, inserting done.  elapsed " + elapsed)
       Ok("Load Test, inserted " + size)
     }
   }
