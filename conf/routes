@@ -19,6 +19,8 @@ POST    /whalesightings/blocking            controllers.WhaleSightingController.
 PUT     /whalesightings/:id/comment         controllers.WhaleSightingController.putWhaleSightingAddComment(id: String)
 GET     /feed/whalesightings/sightings      controllers.WhaleSightingController.whaleSightingsFeed
 
+GET     /whalesightings/loadtest/:size      controllers.WhaleSightingController.loadTest(size: Int)
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 # GET     /webjars/*file              controllers.WebJarAssets.at(file)

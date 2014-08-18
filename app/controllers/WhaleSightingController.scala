@@ -1,7 +1,7 @@
 package controllers
 
 import com.p44.db.store.two.MongoDbStoreTwo
-import com.p44.models.{FishStoreModels, Comment, WhaleSighting, WhaleSightingNew}
+import com.p44.models._
 import play.api.Logger
 import play.api.libs.EventSource
 import play.api.libs.iteratee.{Enumeratee, Concurrent}
@@ -72,6 +72,31 @@ object WhaleSightingController extends Controller {
     }
   }
 
+
+  /**
+   * GET
+   *
+   * Generates whale sightings to the size specified and inserts
+   * to a test specific database
+   *
+   * @param size
+   * @return
+   */
+  def loadTest(size: Int) = Action.async { request =>
+    val generated: List[WhaleSighting] = WhaleSightingGenerator.generate(1000)
+    println("Load Test, generated " + generated.size)
+    println("Load Test, inserting... ")
+    val start = System.currentTimeMillis
+    val f = Future {
+      val collLoadTest = WhaleSighting.getCollection(MongoDbStoreTwo.WHALE_SIGHTING_LOAD_DB)
+      generated.foreach(x => WhaleSighting.insertOneAsFuture(collLoadTest, x))
+    }
+    f.map { x =>
+      println("Load Test, inserting done.")
+      Ok("Load Test, inserted " + size)
+    }
+  }
+
   /**
    * GET
    *
@@ -102,10 +127,6 @@ object WhaleSightingController extends Controller {
     val fSightings: Future[List[WhaleSighting]] = WhaleSighting.findMultipleByQueryWithSortAsFuture(db, q, sort, opts)
     fSightings.map { sightings =>
       Ok(Json.prettyPrint(WhaleSighting.toJsArray(sightings)))
-//      sightings.isEmpty match {
-//        case true => Ok(FishStoreModels.JSON_ARRAY_EMPTY)
-//        case Some(ws) => Ok(Json.prettyPrint(WhaleSighting.toJsArray(sightings)))
-//      }
     }
   }
 
