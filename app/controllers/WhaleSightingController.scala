@@ -1,14 +1,18 @@
 package controllers
 
+import com.mongodb.WriteConcern
 import com.p44.db.store.two.MongoDbStoreTwo
+import com.p44.db.whales.WhalesDb
 import com.p44.models._
+import com.p44.util.CasbahWhaleLoadTester
 import play.api.Logger
 import play.api.libs.EventSource
-import play.api.libs.iteratee.{Enumeratee, Concurrent}
+import play.api.libs.iteratee.{Iteratee, Enumerator, Enumeratee, Concurrent}
 import play.api.libs.json.{JsArray, JsValue, Json}
 import play.api.mvc.{AnyContent, Request, Action, Controller}
-import reactivemongo.api.{QueryOpts, DefaultDB}
+import reactivemongo.api.{Cursor, QueryOpts, DefaultDB}
 import reactivemongo.core.commands.LastError
+import reactivemongo.api.collections.default.BSONCollection
 
 import scala.concurrent.{Await, Future, ExecutionContext}
 
@@ -28,14 +32,17 @@ object WhaleSightingController extends Controller {
     Future { Ok(views.html.whalesightings.render) }
   }
 
-  /** POST */
+  /** POST a new whale sighting */
   def postWhaleSighting = Action.async { request =>
     val fSighting = Future[Option[WhaleSighting]] { resolvePostWhaleSightingJsonToObj(request) }
     fSighting.flatMap { ows =>
       ows match {
-        case None => Future.successful(BadRequest("Please check your request for content type of json as well as the json format."))
+        case None => {
+          val m = "Please check your request for content type of json as well as the json format."
+          Future.successful(BadRequest(m))
+        }
         case Some(ws) => {
-          val fResult = WhaleSighting.insertOneAsFuture(db, ws)
+          val fResult: Future[LastError] = WhaleSighting.insertOneAsFuture(db, ws)
           fResult.map { le =>
             le.ok match {
               case true => {
@@ -74,13 +81,8 @@ object WhaleSightingController extends Controller {
 
 
   /**
-   * GET
-   *
    * Generates whale sightings to the size specified and inserts
    * to a test specific database
-   *
-   * @param size
-   * @return
    */
   def loadTest(size: Int) = Action.async { request =>
     // Synchronous - generate synchronously to test the db concurrency only
@@ -90,14 +92,70 @@ object WhaleSightingController extends Controller {
     val start = System.currentTimeMillis
     // Synchronous end
     val f = Future {
-      val collLoadTest = WhaleSighting.getCollection(MongoDbStoreTwo.WHALE_SIGHTING_LOAD_DB)
-      generated.foreach(x => WhaleSighting.insertOneAsFuture(collLoadTest, x))
+      val collLoadTest = WhaleSighting.getCollection(WhalesDb.WHALE_SIGHTING_LOAD_DB)
+      generated.foreach(x => insertOneNonBlocking(collLoadTest, x))
     }
     f.map { x =>
-      val elapsed = System.currentTimeMillis - start
+      val end = System.currentTimeMillis
+      val elapsed = end - start
       println("Load Test, inserting done.  elapsed " + elapsed)
       Ok("Load Test, inserted " + size)
     }
+  }
+
+  /** */
+  def insertOneNonBlocking(collLoadTest: BSONCollection, ws: WhaleSighting): Unit = {
+    val f: Future[LastError] = WhaleSighting.insertOneAsFuture(collLoadTest, ws)
+    f.onComplete {
+      case scala.util.Success(v) => // do nothing
+      case scala.util.Failure(e) => println("** failed insert for " + ws)
+    }
+  }
+
+  /**
+   * Generates whale sightings to the size specified and inserts
+   * to a test specific database.
+   *
+   * Calls insertOneWithBlock(collLoadTest, x) for each insert with uses Await
+   */
+  def loadTestBlockEachInsert(size: Int) = Action { request =>
+    // Synchronous - generate synchronously to test the db concurrency only
+    val generated: List[WhaleSighting] = WhaleSightingGenerator.generate(size)
+    println("Load Test with blocking, generated " + generated.size)
+    println("Load Test with blocking, inserting... ")
+    val start = System.currentTimeMillis
+    val collLoadTest = WhaleSighting.getCollection(WhalesDb.WHALE_SIGHTING_LOAD_DB)
+    generated.foreach(x => insertOneWithBlock(collLoadTest, x))
+    val elapsed = System.currentTimeMillis - start
+    println("Load Test with blocking, inserting done.  elapsed " + elapsed)
+    Ok("Load Test with blocking, inserted " + size)
+    // Synchronous end
+  }
+
+  /** */
+  def insertOneWithBlock(collLoadTest: BSONCollection, ws: WhaleSighting): Boolean = {
+    val f: Future[LastError] = WhaleSighting.insertOneAsFuture(collLoadTest, ws)
+    val le = Await.result(f, timeout)
+    le.ok
+  }
+
+  /**
+   * Load test to the load db using the Casbah driver
+   *
+   */
+  def loadTestCasbah(size: Int) = Action { request =>
+    val generated: List[WhaleSighting] = WhaleSightingGenerator.generate(size)
+    println("Load Test with casbah, generated " + generated.size)
+    println("Load Testwith casbah, inserting... ")
+    val start = System.currentTimeMillis
+    val wc = WriteConcern.SAFE // Reactive offers a result with callbacks.
+    // We could insert super fast with NORMAL, but we would not have a result of the insert
+    // So to match functionality, inserting with SAFE to check the insert result
+    val coll = CasbahWhaleLoadTester.collectionWhaleSightingInLoadDb
+    generated.foreach(x => CasbahWhaleLoadTester.insertOneWhaleSighting(coll, x, wc))
+    val elapsed = System.currentTimeMillis - start
+    println("Load Test with casbah, inserting done.  elapsed " + elapsed)
+    Ok("Load Test with casbah, inserted " + size)
   }
 
   /**

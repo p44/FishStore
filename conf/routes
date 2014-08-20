@@ -19,7 +19,9 @@ POST    /whalesightings/blocking            controllers.WhaleSightingController.
 PUT     /whalesightings/:id/comment         controllers.WhaleSightingController.putWhaleSightingAddComment(id: String)
 GET     /feed/whalesightings/sightings      controllers.WhaleSightingController.whaleSightingsFeed
 
-GET     /whalesightings/loadtest/:size      controllers.WhaleSightingController.loadTest(size: Int)
+GET     /whalesightings/loadtest/:size        controllers.WhaleSightingController.loadTest(size: Int)
+GET     /whalesightings/loadtest/block/:size  controllers.WhaleSightingController.loadTestBlockEachInsert(size: Int)
+GET     /whalesightings/loadtest/casbah/:size controllers.WhaleSightingController.loadTestCasbah(size: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
