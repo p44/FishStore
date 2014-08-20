@@ -1,7 +1,8 @@
 package com.p44.models
 
+import com.p44.db.Persistable
 import play.api.libs.json.{JsArray, Json}
-import reactivemongo.bson.{BSONObjectID, BSONDocument, BSONDocumentReader, BSONDocumentWriter}
+import reactivemongo.bson._
 
 /**
  * A reported whale sighting with identifier
@@ -76,6 +77,8 @@ object WhaleSighting extends Persistable[WhaleSighting]{
   def findByBody(ws: WhaleSighting): BSONDocument = {
     BSONDocument(fieldTimestamp -> ws.timestamp, fieldCount -> ws.count, fieldBreed -> ws.breed, fieldDescription -> ws.description)
   }
+  def findByTimestampGte(tsMillis: Long): BSONDocument = { BSONDocument(fieldTimestamp -> BSONDocument("$gte" -> tsMillis)) } // {"$gte" : 1341105309000}}
+  def findByTimestampBetween(min: Long, max: Long): BSONDocument = { BSONDocument(fieldTimestamp -> BSONDocument("$gte" -> min), fieldTimestamp -> BSONDocument("$lt" -> max)) }
 
   // sorts
   def sortTimestampDesc: BSONDocument = BSONDocument(fieldTimestamp -> -1)
@@ -97,7 +100,7 @@ object WhaleSighting extends Persistable[WhaleSighting]{
  */
 object WhaleSightingGenerator {
   val breeds = List("Right Whale", "Bowhead Whale", "Gray Whale", "Fin Whale", "Sei Whale", "Blue Whale", "Narwhal", "Beluga")
-  def getRandomCount: Int = scala.util.Random.nextInt(5)
+  def getRandomCount: Int = { scala.util.Random.nextInt(4) + 1 } // 1-5
   def getRandomBreed: String = breeds(scala.util.Random.nextInt(breeds.size))
 
   /**
