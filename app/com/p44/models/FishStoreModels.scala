@@ -47,7 +47,8 @@ object FishStoreModels {
   val CONF = ConfigFactory.load
 
   val FISHSTORE_TWO_DB_NAME = CONF.getString("store.two.mongodb.database").trim
-  val FISHSTORE_TWO_DB_HOSTS: List[String] = List(CONF.getString("store.two.mongodb.hosts").trim)
+  val FISHSTORE_TWO_DB_HOSTS_AS_STRING = CONF.getString("store.two.mongodb.hosts").trim
+  val FISHSTORE_TWO_DB_HOSTS: List[String] = List(FISHSTORE_TWO_DB_HOSTS_AS_STRING)
 
   val JSON_ARRAY_EMPTY = "[]"
 
