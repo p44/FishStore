@@ -27,10 +27,4 @@ object MongoDbStoreTwo {
   lazy val collectionFishDelivered = getCollection(STORE_TWO_DB, collectionNameFishDelivered)
 
 
-  // Whale sighting load db
-
-  val WHALE_SIGHTING_LOAD_DB_NAME = "whale-sighting-load"
-  lazy val connWhaleSightingLoadDb: MongoConnection = driver.connection(FishStoreModels.FISHSTORE_TWO_DB_HOSTS)
-  lazy val WHALE_SIGHTING_LOAD_DB: DefaultDB = connWhaleSightingLoadDb.db(WHALE_SIGHTING_LOAD_DB_NAME)
-
 }
