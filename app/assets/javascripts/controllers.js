@@ -242,6 +242,8 @@ angular.module('whaleSightings.controllers', ['whaleSightings.services']).
             ,{ id : "Blue Whale"  , name: "Blue Whale" }
             ,{ id : "Narwhal"  , name: "Narwhal" }
             ,{ id : "Beluga"  , name: "Beluga" }
+            ,{ id : "Humpback Whale"  , name: "Humpback Whale" }
+            ,{ id : "Other"  , name: "Other" }
             ,{ id : "Unknown"  , name: "Unknown" }
         ];
 
