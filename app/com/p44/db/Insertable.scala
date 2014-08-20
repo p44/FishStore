@@ -1,9 +1,9 @@
-package com.p44.models
+package com.p44.db
 
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.api.{DefaultDB, QueryOpts}
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter}
-import reactivemongo.core.commands.{LastError, GetLastError}
+import reactivemongo.core.commands.{GetLastError, LastError}
 
 import scala.concurrent.{ExecutionContext, Future}
 

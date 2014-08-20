@@ -1,9 +1,9 @@
-package com.p44.models
+package com.p44.db
 
 import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.api.{DefaultDB, QueryOpts, FailoverStrategy}
-import reactivemongo.bson.{BSONObjectID, BSONDocument, BSONDocumentReader, BSONDocumentWriter}
-import reactivemongo.core.commands.{LastError, GetLastError}
+import reactivemongo.api.{DefaultDB, FailoverStrategy, QueryOpts}
+import reactivemongo.bson.{BSONDocument, BSONDocumentReader, BSONDocumentWriter, BSONObjectID}
+import reactivemongo.core.commands.{GetLastError, LastError}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,6 +15,10 @@ trait Persistable[T] {
   val collectionName: String // name of the mongodb collection
   val failoverStrategy: Option[FailoverStrategy] = None // optional
   val lastErrorDefault: GetLastError = GetLastError() // GetLastError(false, None, false)
+  // GetLastError:
+  //   awaitJournalCommit: Boolean = false,
+  //   waitForReplicatedOn: Option[Int] = scala.None,
+  //   fsync: Boolean = false  //Make sure that the previous (write) operation has been written on the disk.
   val queryOptsDefault: QueryOpts = QueryOpts() // QueryOpts(skipN: Int = 0, batchSizeN: Int = 0, flagsN: Int = 0)
 
   val persistanceWriter: BSONDocumentWriter[T]
@@ -90,5 +94,18 @@ trait Persistable[T] {
 
   def findOneByQueryWithProjectionAsFuture(collection: BSONCollection, query: BSONDocument, projection: BSONDocument): Future[Option[BSONDocument]] = {
     collection.find(query, projection).one[BSONDocument]
+  }
+
+  /**
+   * If the param objAsDoc has an _id then an update will be called, otherwise an insert is called
+   * via mongo save()
+   *
+   * @param collection
+   * @param objAsDoc
+   * @param getLastError
+   * @return
+   */
+  def saveOneAsFuture(collection: BSONCollection, objAsDoc: BSONDocument, getLastError: GetLastError = lastErrorDefault): Future[LastError] = {
+    collection.save(objAsDoc, getLastError)
   }
 }
