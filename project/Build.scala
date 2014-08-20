@@ -11,6 +11,7 @@ object ApplicationBuild extends Build {
       "com.typesafe.akka" %% "akka-testkit" % "2.2.1" % "test",
       "joda-time" % "joda-time" % "2.3",
       "org.reactivemongo" %% "reactivemongo" % "0.10.0",
+      "org.mongodb" %% "casbah" % "2.5.0",
       cache
   )
  
