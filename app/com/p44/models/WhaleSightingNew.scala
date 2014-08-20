@@ -1,5 +1,6 @@
 package com.p44.models
 
+import com.p44.db.Insertable
 import play.api.libs.json.{JsArray, Json}
 import reactivemongo.bson.{BSONDocument, BSONDocumentWriter}
 
