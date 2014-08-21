@@ -14,8 +14,8 @@ trait Persistable[T] {
 
   val collectionName: String // name of the mongodb collection
   val failoverStrategy: Option[FailoverStrategy] = None // optional
-  val lastErrorDefault: GetLastError = GetLastError(false, None, 0, true) // GetLastError() is GetLastError(false, None, 0, false)
-// GetLastError:
+  val lastErrorDefault: GetLastError = GetLastError(false, None, 0, true)
+// GetLastError() is GetLastError(false, None, 0, false)
 //@param j Make sure that the previous operation has been committed into the journal. Journaling must be enabled on the servers.
 //@param w Specify the level of replication for a write operation. Should be a BSONString or BSONInteger. See [[http://docs.mongodb.org/manual/reference/command/getLastError/#dbcmd.getLastError the MongoDB documentation]].
 //@param wtimeout Write propagation timeout (in milliseconds). See [[http://docs.mongodb.org/manual/reference/command/getLastError/#dbcmd.getLastError the MongoDB documentation]].
